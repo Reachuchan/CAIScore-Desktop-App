@@ -1,0 +1,12 @@
+build/
+dist/
+release/
+*.spec
+*.zip
+*.exe
+*.log
+__pycache__/
+.matplotlib/
+AppData/
+caiscore_source/
+runtime/
