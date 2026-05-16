@@ -10,17 +10,26 @@ echo Downloading CAIScore installer files...
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$ProgressPreference='Continue';" ^
   "$files=@(" ^
-  "'CAIScore_Setup.exe'," ^
-  "'Install_CAIScore_From_Parts.ps1'," ^
-  "'CAIScore_Desktop_Portable_Min_Fixed_v2.zip.part001'," ^
-  "'CAIScore_Desktop_Portable_Min_Fixed_v2.zip.part002'," ^
-  "'CAIScore_Desktop_Portable_Min_Fixed_v2.zip.part003'" ^
+  "  @{Name='CAIScore_Setup.exe'; Size=8679141}," ^
+  "  @{Name='Install_CAIScore_From_Parts.ps1'; Size=768}," ^
+  "  @{Name='CAIScore_Desktop_Portable_Min_Fixed_v2.zip.part001'; Size=1992294400}," ^
+  "  @{Name='CAIScore_Desktop_Portable_Min_Fixed_v2.zip.part002'; Size=1992294400}," ^
+  "  @{Name='CAIScore_Desktop_Portable_Min_Fixed_v2.zip.part003'; Size=730086136}" ^
   ");" ^
   "$base='%BASE_URL%';" ^
   "foreach($f in $files){" ^
-  "  $out=Join-Path (Get-Location) $f;" ^
-  "  if(-not (Test-Path $out)){" ^
-  "    Invoke-WebRequest -Uri ($base + '/' + $f) -OutFile $out" ^
+  "  $out=Join-Path (Get-Location) $f.Name;" ^
+  "  $needDownload=$true;" ^
+  "  if(Test-Path $out){" ^
+  "    $actual=(Get-Item $out).Length;" ^
+  "    if($actual -eq [int64]$f.Size){ $needDownload=$false } else { Remove-Item -Force $out }" ^
+  "  }" ^
+  "  if($needDownload){" ^
+  "    Write-Host ('Downloading ' + $f.Name + ' ...');" ^
+  "    & curl.exe --ssl-no-revoke -L --fail --output $out ($base + '/' + $f.Name);" ^
+  "    if($LASTEXITCODE -ne 0){ throw ('Download failed: ' + $f.Name) }" ^
+  "    $actual=(Get-Item $out).Length;" ^
+  "    if($actual -ne [int64]$f.Size){ throw ('Downloaded file size mismatch: ' + $f.Name + ' (' + $actual + ' bytes)') }" ^
   "  }" ^
   "};" ^
   "& powershell -NoProfile -ExecutionPolicy Bypass -File '.\Install_CAIScore_From_Parts.ps1'"
