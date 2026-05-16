@@ -17,6 +17,7 @@ How to use:
 4. After installation, open **CAIScore Desktop App** from the desktop shortcut or Start Menu.
 
 If Windows shows a security prompt, choose `More info` and then `Run anyway`.
+If GitHub is temporarily slow, run the one-click installer again. The new downloader retries automatically and validates file integrity before installation.
 
 ## What The Software Does
 
