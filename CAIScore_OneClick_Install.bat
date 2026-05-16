@@ -13,20 +13,38 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "  $methods=@('BITS','CURL');" ^
   "  foreach($method in $methods){" ^
   "    for($i=1; $i -le 3; $i++){" ^
-  "      try {" ^
-  "        if(Test-Path $outFile){ Remove-Item -Force $outFile }" ^
-  "        Write-Host ('  Attempt ' + $i + ' via ' + $method);" ^
-  "        if($method -eq 'BITS'){" ^
-  "          Start-BitsTransfer -Source $url -Destination $outFile -DisplayName 'CAIScore download' -Description $url" ^
-  "        } else {" ^
-  "          & curl.exe --ssl-no-revoke -L --fail --retry 5 --retry-delay 5 --connect-timeout 30 --output $outFile $url;" ^
+      "      try {" ^
+        "        if(Test-Path $outFile){ Remove-Item -Force $outFile }" ^
+        "        Write-Host ('  Attempt ' + $i + ' via ' + $method);" ^
+        "        if($method -eq 'BITS'){" ^
+  "          $job = Start-BitsTransfer -Source $url -Destination $outFile -Asynchronous -DisplayName 'CAIScore download' -Description $url -ErrorAction Stop;" ^
+  "          try {" ^
+  "            while($true){" ^
+  "              $state = $job.JobState.ToString();" ^
+  "              if($state -eq 'Transferred'){" ^
+  "                Complete-BitsTransfer -BitsJob $job -ErrorAction Stop;" ^
+  "                break" ^
+  "              }" ^
+  "              if($state -in @('Error','TransientError','Cancelled')){" ^
+  "                throw ('BITS state: ' + $state)" ^
+  "              }" ^
+  "              Start-Sleep -Seconds 3;" ^
+  "              $job = Get-BitsTransfer -JobId $job.JobId -ErrorAction Stop" ^
+  "            }" ^
+  "          } finally {" ^
+  "            try { Remove-BitsTransfer -BitsJob $job -Confirm:$false -ErrorAction SilentlyContinue } catch {}" ^
+  "          }" ^
+        "        } else {" ^
+  "          & curl.exe --ssl-no-revoke -L --fail --retry 8 --retry-all-errors --retry-delay 5 --connect-timeout 30 --max-time 0 --output $outFile $url;" ^
   "          if($LASTEXITCODE -ne 0){ throw ('curl exit code ' + $LASTEXITCODE) }" ^
   "        }" ^
+  "        if(-not (Test-Path $outFile)){ throw 'Downloaded file was not created' }" ^
   "        $actual=(Get-Item $outFile).Length;" ^
   "        if($actual -ne [int64]$expectedSize){ throw ('Downloaded file size mismatch: ' + $actual + ' bytes') }" ^
   "        return" ^
   "      } catch {" ^
   "        Write-Host ('    Failed: ' + $_.Exception.Message) -ForegroundColor Yellow;" ^
+  "        if(Test-Path $outFile){ Remove-Item -Force $outFile -ErrorAction SilentlyContinue }" ^
   "        Start-Sleep -Seconds 3" ^
   "      }" ^
   "    }" ^
@@ -35,7 +53,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "}" ^
   "$files=@(" ^
   "  @{Name='CAIScore_Setup.exe'; Size=8679141}," ^
-  "  @{Name='Install_CAIScore_From_Parts.ps1'; Size=768}," ^
+  "  @{Name='Install_CAIScore_From_Parts.ps1'; Size=1691}," ^
   "  @{Name='CAIScore_Desktop_Portable_Min_Fixed_v2.zip.part001'; Size=1992294400}," ^
   "  @{Name='CAIScore_Desktop_Portable_Min_Fixed_v2.zip.part002'; Size=1992294400}," ^
   "  @{Name='CAIScore_Desktop_Portable_Min_Fixed_v2.zip.part003'; Size=730086136}" ^
