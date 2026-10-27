@@ -24,7 +24,7 @@
 
 ## 🎯 软件简介
 
-**CAIScore Desktop App** 是一款专为**肝细胞癌（HCC）**设计的轻量级、完全离线的桌面端临床辅助评估工具。
+**CAIScore Desktop App** 是一款专为**肝细胞癌 (HCC)**设计的轻量级、完全离线的桌面端临床辅助评估工具。
 
 软件基于多算法集成框架（集成 AUCell、UCell、singscore、ssGSEA 与 Seurat AddModuleScore）计算肿瘤样本的综合基因集特征活性（CAIScore），并结合患者的年龄（Age）与临床 TNM 分期（Stage），通过严谨的 Cox 比例风险回归（CPH）列线图（Nomogram）模型，预测患者的**免疫逃逸潜能**以及 **1 至 5 年的总生存率（Overall Survival, OS）**。
 
