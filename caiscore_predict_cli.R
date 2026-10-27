@@ -23,7 +23,19 @@ suppressPackageStartupMessages({
 })
 
 target_genes <- readRDS(file.path(base_dir, "caiscore_source", "target_genes_list.rds"))
-reference_mat <- readRDS(file.path(base_dir, "caiscore_source", "reference_matrix.rds"))
+ref_file <- file.path(base_dir, "caiscore_source", "reference_matrix.rds")
+if (!file.exists(ref_file)) {
+  part_files <- sort(list.files(file.path(base_dir, "caiscore_source"), pattern = "^reference_matrix\\.rds\\.part", full.names = TRUE))
+  if (length(part_files) > 0) {
+    con_out <- file(ref_file, "wb")
+    for (pf in part_files) {
+      bytes <- readBin(pf, "raw", n = file.info(pf)$size)
+      writeBin(bytes, con_out)
+    }
+    close(con_out)
+  }
+}
+reference_mat <- readRDS(ref_file)
 model_cph <- readRDS(file.path(base_dir, "caiscore_source", "final_model_cph.rds"))
 saved_ddist <- readRDS(file.path(base_dir, "caiscore_source", "final_datadist.rds"))
 options(datadist = "saved_ddist")

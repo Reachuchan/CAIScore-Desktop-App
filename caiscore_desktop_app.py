@@ -13,6 +13,8 @@ def detect_rscript(base_dir: Path):
     bundled = [
         base_dir / "runtime" / "R" / "bin" / "Rscript.exe",
         base_dir / "runtime" / "R" / "bin" / "x64" / "Rscript.exe",
+        base_dir / "runtime" / "R" / "bin" / "Rscript",
+        base_dir / "R" / "bin" / "Rscript",
     ]
     for p in bundled:
         if p.exists():
@@ -23,6 +25,9 @@ def detect_rscript(base_dir: Path):
         r"D:\R\R-4.3.1\bin\x64\Rscript.exe",
         r"C:\Program Files\R\R-4.3.1\bin\Rscript.exe",
         r"C:\Program Files\R\R-4.3.1\bin\x64\Rscript.exe",
+        "/Library/Frameworks/R.framework/Resources/bin/Rscript",
+        "/usr/local/bin/Rscript",
+        "/opt/homebrew/bin/Rscript",
     ]
     for c in candidates:
         if os.path.exists(c):
