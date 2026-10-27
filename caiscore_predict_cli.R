@@ -16,6 +16,10 @@ suppressPackageStartupMessages({
   library(CAIScore)
   library(rms)
   library(survival)
+  # Force serial in-memory processing to avoid any Windows Firewall socket prompts
+  if (requireNamespace("BiocParallel", quietly = TRUE)) {
+    BiocParallel::register(BiocParallel::SerialParam())
+  }
 })
 
 target_genes <- readRDS(file.path(base_dir, "caiscore_source", "target_genes_list.rds"))

@@ -23,13 +23,14 @@ def detect_rscript(base_dir: Path):
         r"D:\R\R-4.3.1\bin\x64\Rscript.exe",
         r"C:\Program Files\R\R-4.3.1\bin\Rscript.exe",
         r"C:\Program Files\R\R-4.3.1\bin\x64\Rscript.exe",
-        "Rscript",
     ]
     for c in candidates:
-        if c == "Rscript":
-            return c
         if os.path.exists(c):
             return c
+    # Fallback to system PATH Rscript only if it really exists in PATH
+    which_r = shutil.which("Rscript")
+    if which_r:
+        return which_r
     return None
 
 
@@ -286,7 +287,10 @@ class CAIScoreApp:
             messagebox.showerror(self.t("错误", "Error"), self.t("Stage 必须是 I/II/III/IV。", "Stage must be I/II/III/IV."))
             return
 
-        script_path = self.base_dir / "caiscore_predict_cli.R"
+        # Check both exe_dir (allows external patch) and base_dir (MEIPASS bundle)
+        script_path = self.exe_dir / "caiscore_predict_cli.R"
+        if not script_path.exists():
+            script_path = self.base_dir / "caiscore_predict_cli.R"
         if not script_path.exists():
             messagebox.showerror(self.t("错误", "Error"), f"Missing script: {script_path}")
             return
